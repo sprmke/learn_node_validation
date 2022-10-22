@@ -22,6 +22,7 @@ exports.getLogin = (req, res, next) => {
     path: '/login',
     pageTitle: 'Login',
     errorMessage,
+    validationErrors: {},
   });
 };
 
@@ -32,6 +33,7 @@ exports.getSignup = (req, res, next) => {
     path: '/signup',
     pageTitle: 'Signup',
     errorMessage,
+    validationErrors: {},
     oldInput: {
       email: '',
       password: '',
@@ -44,12 +46,17 @@ exports.postLogin = (req, res, next) => {
   const { email, password } = req.body;
 
   const errors = validationResult(req);
+  const validationErrors = errors
+    .array()
+    .map((error) => error.param)
+    .reduce((a, v) => ({ ...a, [v]: v }), {});
 
   if (!errors.isEmpty()) {
     return res.status(422).render('auth/login', {
       path: '/login',
       pageTitle: 'Login',
       errorMessage: errors.array()[0].msg,
+      validationErrors,
     });
   }
 
@@ -86,12 +93,18 @@ exports.postSignup = (req, res, next) => {
 
   // add validation here
   const errors = validationResult(req);
+  const validationErrors = errors
+    .array()
+    .map((error) => error.param)
+    .reduce((a, v) => ({ ...a, [v]: v }), {});
 
   if (!errors.isEmpty()) {
+    console.log('validationErrors::', validationErrors);
     return res.status(422).render('auth/signup', {
       path: '/signup',
       pageTitle: 'Signup',
       errorMessage: errors.array()[0].msg,
+      validationErrors,
       oldInput: {
         email,
         password,
