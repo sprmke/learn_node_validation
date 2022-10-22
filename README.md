@@ -1,4 +1,4 @@
-# Learn Node: Adding Basic & Advanced Authentication
+# Learn Node: Node Validation
 
 ##### Course:
 
@@ -6,5 +6,5 @@
 
 ##### Application Scope:
 
-- S15&17: Adding Basic & Advanced Authentication
-- Topics discussed: Implement authentication with Session & Cookies, Password Encryption using bcryptjs, Add SignIn & SignOut Functionalities, Route Protection, Adding CSRF Protection using csurf, Adding Authentication Feedbacks using connect-flash, Sending emails, Resetting Passwords, Implement Authorization, Adding protection to Post Actions
+- S18: Node Validation
+- Topics discussed: Validation using express-validator, Custom validators, Async Validation, Sanitizing Data
