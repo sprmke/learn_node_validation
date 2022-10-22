@@ -18,7 +18,7 @@ const getErrorMessage = (req) => {
 exports.getLogin = (req, res, next) => {
   const errorMessage = getErrorMessage(req);
 
-  res.render('auth/login', {
+  res.status(422).render('auth/login', {
     path: '/login',
     pageTitle: 'Login',
     errorMessage,
@@ -32,6 +32,11 @@ exports.getSignup = (req, res, next) => {
     path: '/signup',
     pageTitle: 'Signup',
     errorMessage,
+    oldInput: {
+      email: '',
+      password: '',
+      confirmPassword: '',
+    },
   });
 };
 
@@ -77,7 +82,7 @@ exports.postLogin = (req, res, next) => {
 };
 
 exports.postSignup = (req, res, next) => {
-  const { email, password } = req.body;
+  const { email, password, confirmPassword } = req.body;
 
   // add validation here
   const errors = validationResult(req);
@@ -87,6 +92,11 @@ exports.postSignup = (req, res, next) => {
       path: '/signup',
       pageTitle: 'Signup',
       errorMessage: errors.array()[0].msg,
+      oldInput: {
+        email,
+        password,
+        confirmPassword,
+      },
     });
   }
 
