@@ -2,7 +2,7 @@ const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 const bcrypt = require('bcryptjs');
 const User = require('../models/user');
-const { validationResult } = require('express-validator/check');
+const { validationResult } = require('express-validator');
 
 const getErrorMessage = (req) => {
   let errorMessage = req.flash('errorMessage');
@@ -38,15 +38,18 @@ exports.getSignup = (req, res, next) => {
 exports.postLogin = (req, res, next) => {
   const { email, password } = req.body;
 
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    return res.status(422).render('auth/login', {
+      path: '/login',
+      pageTitle: 'Login',
+      errorMessage: errors.array()[0].msg,
+    });
+  }
+
   User.findOne({ email })
     .then((user) => {
-      if (!user) {
-        req.flash('errorMessage', 'Invalid email or password.');
-        return req.session.save((error) => {
-          return res.redirect('/login');
-        });
-      }
-
       // validate password
       bcrypt
         .compare(password, user.password)
