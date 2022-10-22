@@ -15,6 +15,30 @@ const getErrorMessage = (req) => {
   return errorMessage;
 };
 
+const handleLoginError = ({
+  res,
+  oldInput = {},
+  errors,
+  errorMsg = '',
+  isCustomError = false,
+}) => {
+  const errorMessage = isCustomError ? errorMsg : errors.array()[0].msg;
+  const validationErrors = isCustomError
+    ? oldInput
+    : errors
+        .array()
+        .map((error) => error.param)
+        .reduce((a, v) => ({ ...a, [v]: v }), {});
+
+  return res.status(422).render('auth/login', {
+    path: '/login',
+    pageTitle: 'Login',
+    errorMessage,
+    validationErrors,
+    oldInput,
+  });
+};
+
 exports.getLogin = (req, res, next) => {
   const errorMessage = getErrorMessage(req);
 
@@ -23,6 +47,10 @@ exports.getLogin = (req, res, next) => {
     pageTitle: 'Login',
     errorMessage,
     validationErrors: {},
+    oldInput: {
+      email: '',
+      password: '',
+    },
   });
 };
 
@@ -46,18 +74,9 @@ exports.postLogin = (req, res, next) => {
   const { email, password } = req.body;
 
   const errors = validationResult(req);
-  const validationErrors = errors
-    .array()
-    .map((error) => error.param)
-    .reduce((a, v) => ({ ...a, [v]: v }), {});
 
   if (!errors.isEmpty()) {
-    return res.status(422).render('auth/login', {
-      path: '/login',
-      pageTitle: 'Login',
-      errorMessage: errors.array()[0].msg,
-      validationErrors,
-    });
+    handleLoginError({ res, oldInput: { email, password }, errors });
   }
 
   User.findOne({ email })
@@ -75,9 +94,16 @@ exports.postLogin = (req, res, next) => {
             });
           }
 
-          req.flash('errorMessage', 'Invalid email or password.');
+          const errorMessage = 'Invalid email or password.';
+          req.flash('errorMessage', errorMessage);
           return req.session.save((err) => {
-            res.redirect('/login');
+            handleLoginError({
+              res,
+              oldInput: { email, password },
+              errors: [],
+              errorMsg: errorMessage,
+              isCustomError: true,
+            });
           });
         })
         .catch((err) => {
