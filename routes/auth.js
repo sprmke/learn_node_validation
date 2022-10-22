@@ -22,7 +22,9 @@ router.post(
             return Promise.reject('Email doesnt exist');
           }
         });
-      }),
+      })
+      .trim()
+      .normalizeEmail(),
   ],
   authController.postLogin
 );
@@ -46,22 +48,28 @@ router.post(
             return Promise.reject('Email already exists.');
           }
         });
-      }),
+      })
+      .trim()
+      .normalizeEmail(),
+    ,
     body(
       'password',
       'Password should be atleast 5 characters in length and should contain alphanumeric characters'
     )
       .isLength({ min: 5 })
       // .withMessage('Password should be atleast 5 characters in length')
-      .isAlphanumeric(),
-    // .withMessage('Password should be only contains alphanumeric characters'),
-    body('confirmPassword').custom((value, { req }) => {
-      if (value !== req.body.password) {
-        throw new Error('Password and Confirm Password do not match');
-      }
+      .isAlphanumeric()
+      // .withMessage('Password should be only contains alphanumeric characters'),
+      .trim(),
+    body('confirmPassword')
+      .custom((value, { req }) => {
+        if (value !== req.body.password) {
+          throw new Error('Password and Confirm Password do not match');
+        }
 
-      return true;
-    }),
+        return true;
+      })
+      .trim(),
   ],
   authController.postSignup
 );
