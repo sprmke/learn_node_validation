@@ -32,6 +32,13 @@ router.post(
       // .withMessage('Password should be atleast 5 characters in length')
       .isAlphanumeric(),
     // .withMessage('Password should be only contains alphanumeric characters'),
+    body('confirmPassword').custom((value, { req }) => {
+      if (value !== req.body.password) {
+        throw new Error('Password and Confirm Password do not match');
+      }
+
+      return true;
+    }),
   ],
   authController.postSignup
 );
