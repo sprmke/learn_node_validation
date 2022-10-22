@@ -51,7 +51,6 @@ router.post(
       })
       .trim()
       .normalizeEmail(),
-    ,
     body(
       'password',
       'Password should be atleast 5 characters in length and should contain alphanumeric characters'
