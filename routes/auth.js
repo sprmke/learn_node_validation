@@ -1,7 +1,8 @@
 const express = require('express');
-const { check, body } = require('express-validator/check');
+const { check, body } = require('express-validator');
 
 const authController = require('../controllers/auth');
+const User = require('../models/user');
 
 const router = express.Router();
 
@@ -23,6 +24,13 @@ router.post(
         }
 
         return true;
+      })
+      .custom((value, { req }) => {
+        return User.findOne({ email: value }).then((user) => {
+          if (user) {
+            return Promise.reject('Email already exists.');
+          }
+        });
       }),
     body(
       'password',

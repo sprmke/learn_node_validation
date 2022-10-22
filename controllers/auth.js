@@ -74,7 +74,7 @@ exports.postLogin = (req, res, next) => {
 };
 
 exports.postSignup = (req, res, next) => {
-  const { email, password, confirmPassword } = req.body;
+  const { email, password } = req.body;
 
   // add validation here
   const errors = validationResult(req);
@@ -87,37 +87,33 @@ exports.postSignup = (req, res, next) => {
     });
   }
 
-  User.findOne({ email })
-    .then((user) => {
-      // if user email already exist, redirect to signup page
-      if (user) {
-        req.flash('errorMessage', 'Email already exists.');
-        return req.session.save((error) => {
-          res.redirect('/signup');
-        });
-      }
+  // User.findOne({ email })
+  //   .then((user) => {
+  //     // if user email already exist, redirect to signup page
+  //     if (user) {
+  //       req.flash('errorMessage', 'Email already exists.');
+  //       return req.session.save((error) => {
+  //         res.redirect('/signup');
+  //       });
+  //     }
+  //   })
 
-      // encrypt password
-      return bcrypt
-        .hash(password, 12)
-        .then((encryptedPassword) => {
-          // create new user
-          const user = new User({
-            email,
-            password: encryptedPassword,
-            cart: { items: [] },
-          });
+  // encrypt password
+  bcrypt
+    .hash(password, 12)
+    .then((encryptedPassword) => {
+      // create new user
+      const user = new User({
+        email,
+        password: encryptedPassword,
+        cart: { items: [] },
+      });
 
-          return user.save();
-        })
-        .then((result) => res.redirect('/login'));
+      return user.save();
     })
+    .then((result) => res.redirect('/login'))
     .catch((err) => {
       console.log(err);
-      req.flash('errorMessage', 'Email is required.');
-      return req.session.save((error) => {
-        res.redirect('/signup');
-      });
     });
 };
 
