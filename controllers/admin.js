@@ -2,6 +2,41 @@ const { validationResult } = require('express-validator');
 
 const Product = require('../models/product');
 
+const validateProduct = ({ req, res, action, product }) => {
+  const errors = validationResult(req);
+  const validationErrors = errors
+    .array()
+    .map((error) => error.param)
+    .reduce((a, v) => ({ ...a, [v]: v }), {});
+
+  if (!errors.isEmpty()) {
+    const p =
+      action === 'add'
+        ? {
+            render: 'admin/edit-product',
+            title: 'Add Product',
+            path: 'admin/add-poroduct',
+            editing: false,
+          }
+        : {
+            render: 'admin/edit-product',
+            title: 'Edit Product',
+            path: 'admin/edit-poroduct',
+            editing: true,
+          };
+
+    return res.status(422).render(p.render, {
+      pageTitle: p.title,
+      path: p.path,
+      editing: p.editing,
+      product,
+      hasError: true,
+      errorMessage: errors.array()[0].msg,
+      validationErrors,
+    });
+  }
+};
+
 exports.getAddProduct = (req, res, next) => {
   res.render('admin/edit-product', {
     pageTitle: 'Add Product',
@@ -9,6 +44,7 @@ exports.getAddProduct = (req, res, next) => {
     editing: false,
     hasError: false,
     errorMessage: null,
+    validationErrors: {},
   });
 };
 
@@ -18,23 +54,17 @@ exports.postAddProduct = (req, res, next) => {
   const price = req.body.price;
   const description = req.body.description;
 
-  const errors = validationResult(req);
-
-  if (!errors.isEmpty()) {
-    return res.status(422).render('admin/edit-product', {
-      pageTitle: 'Add Product',
-      path: '/admin/add-product',
-      editing: false,
-      product: {
-        title,
-        imageUrl,
-        price,
-        description,
-      },
-      hasError: true,
-      errorMessage: errors.array()[0].msg,
-    });
-  }
+  validateProduct({
+    req,
+    res,
+    action: 'add',
+    product: {
+      title,
+      imageUrl,
+      price,
+      description,
+    },
+  });
 
   const product = new Product({
     title: title,
@@ -72,6 +102,7 @@ exports.getEditProduct = (req, res, next) => {
         product: product,
         hasError: true,
         errorMessage: null,
+        validationErrors: {},
       });
     })
     .catch((err) => console.log(err));
@@ -83,6 +114,19 @@ exports.postEditProduct = (req, res, next) => {
   const updatedPrice = req.body.price;
   const updatedImageUrl = req.body.imageUrl;
   const updatedDesc = req.body.description;
+
+  validateProduct({
+    req,
+    res,
+    action: 'edit',
+    product: {
+      title: updatedTitle,
+      imageUrl: updatedImageUrl,
+      price: updatedPrice,
+      description: updatedDesc,
+      _id: prodId,
+    },
+  });
 
   Product.findById(prodId)
     .then((product) => {

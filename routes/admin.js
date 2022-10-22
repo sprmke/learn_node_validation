@@ -38,7 +38,40 @@ router.post(
 
 router.get('/edit-product/:productId', isAuth, adminController.getEditProduct);
 
-router.post('/edit-product', isAuth, adminController.postEditProduct);
+router.post(
+  '/edit-product',
+  isAuth,
+  [
+    body('title')
+      .not()
+      .isEmpty()
+      .withMessage('Please enter a valid title')
+      .isLength({ min: 3 })
+      .withMessage('Title should be atleast 3 characters in length')
+      .trim()
+      .escape(),
+    body('imageUrl', 'Please enter a valid image URL')
+      .not()
+      .isEmpty()
+      .withMessage()
+      .isURL()
+      .trim(),
+    body('price')
+      .escape()
+      .isCurrency()
+      .withMessage('Please enter a valid price')
+      .trim(),
+    body('description')
+      .trim()
+      .escape()
+      .not()
+      .isEmpty()
+      .withMessage('Please enter a valid description')
+      .isLength({ min: 5, max: 400 })
+      .withMessage('Description should be 5-400 characters in length'),
+  ],
+  adminController.postEditProduct
+);
 
 router.post('/delete-product', isAuth, adminController.postDeleteProduct);
 
