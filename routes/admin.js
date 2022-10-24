@@ -1,8 +1,8 @@
 const express = require('express');
-const { body } = require('express-validator');
 
 const adminController = require('../controllers/admin');
 const isAuth = require('../middleware/is-auth');
+const { validate } = require('../validation/validation');
 
 const router = express.Router();
 
@@ -16,23 +16,7 @@ router.get('/products', isAuth, adminController.getProducts);
 router.post(
   '/add-product',
   isAuth,
-  [
-    body('title')
-      .isString()
-      .withMessage('Please enter a valid title')
-      .isLength({ min: 3 })
-      .withMessage('Title should be atleast 3 characters in length')
-      .trim(),
-    body('imageUrl')
-      .isURL()
-      .withMessage('Please enter a valid image URL')
-      .trim(),
-    body('price').isCurrency().withMessage('Please enter a valid price'),
-    body('description')
-      .isLength({ min: 5, max: 400 })
-      .withMessage('Description should be 5-400 characters in length')
-      .trim(),
-  ],
+  validate('addProduct'),
   adminController.postAddProduct
 );
 
@@ -41,35 +25,7 @@ router.get('/edit-product/:productId', isAuth, adminController.getEditProduct);
 router.post(
   '/edit-product',
   isAuth,
-  [
-    body('title')
-      .not()
-      .isEmpty()
-      .withMessage('Please enter a valid title')
-      .isLength({ min: 3 })
-      .withMessage('Title should be atleast 3 characters in length')
-      .trim()
-      .escape(),
-    body('imageUrl', 'Please enter a valid image URL')
-      .not()
-      .isEmpty()
-      .withMessage()
-      .isURL()
-      .trim(),
-    body('price')
-      .escape()
-      .isCurrency()
-      .withMessage('Please enter a valid price')
-      .trim(),
-    body('description')
-      .trim()
-      .escape()
-      .not()
-      .isEmpty()
-      .withMessage('Please enter a valid description')
-      .isLength({ min: 5, max: 400 })
-      .withMessage('Description should be 5-400 characters in length'),
-  ],
+  validate('editProduct'),
   adminController.postEditProduct
 );
 

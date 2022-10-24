@@ -30,11 +30,6 @@ const handleLoginError = ({
         .map((error) => error.param)
         .reduce((a, v) => ({ ...a, [v]: v }), {});
 
-  // to add input error border to password
-  if (!validationErrors.password) {
-    validationErrors.password = 'password';
-  }
-
   return res.status(422).render('auth/login', {
     path: '/login',
     pageTitle: 'Login',
@@ -129,8 +124,6 @@ exports.postSignup = (req, res, next) => {
     .array()
     .map((error) => error.param)
     .reduce((a, v) => ({ ...a, [v]: v }), {});
-
-  console.log('validationErrors::', validationErrors);
 
   if (!errors.isEmpty()) {
     return res.status(422).render('auth/signup', {

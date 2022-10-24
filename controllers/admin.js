@@ -4,10 +4,10 @@ const Product = require('../models/product');
 
 const validateProduct = ({ req, res, action, product }) => {
   const errors = validationResult(req);
-  const validationErrors = errors
-    .array()
-    .map((error) => error.param)
-    .reduce((a, v) => ({ ...a, [v]: v }), {});
+  const validationErrors = Object.assign(
+    {},
+    ...errors.array().map((error) => ({ [error.param]: error }))
+  );
 
   if (!errors.isEmpty()) {
     const p =
@@ -31,7 +31,6 @@ const validateProduct = ({ req, res, action, product }) => {
       editing: p.editing,
       product,
       hasError: true,
-      errorMessage: errors.array()[0].msg,
       validationErrors,
     });
   }

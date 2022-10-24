@@ -1,8 +1,7 @@
 const express = require('express');
-const { check, body } = require('express-validator');
 
 const authController = require('../controllers/auth');
-const User = require('../models/user');
+const { validate } = require('../validation/validation');
 
 const router = express.Router();
 
@@ -10,71 +9,9 @@ router.get('/login', authController.getLogin);
 
 router.get('/signup', authController.getSignup);
 
-router.post(
-  '/login',
-  [
-    check('email')
-      .isEmail()
-      .withMessage('Please enter a valid email')
-      .custom((value, { req }) => {
-        return User.findOne({ email: value }).then((user) => {
-          if (!user) {
-            return Promise.reject('Email doesnt exist');
-          }
-        });
-      })
-      .if(body('email').notEmpty())
-      .trim()
-      .normalizeEmail(),
-  ],
-  authController.postLogin
-);
+router.post('/login', validate('postLogin'), authController.postLogin);
 
-router.post(
-  '/signup',
-  [
-    check('email')
-      .isEmail()
-      .withMessage('Please enter a valid email')
-      .custom((value, { req }) => {
-        if (value === 'email@test.com') {
-          throw new Error('Test email is not allowed');
-        }
-
-        return true;
-      })
-      .custom((value, { req }) => {
-        return User.findOne({ email: value }).then((user) => {
-          if (user) {
-            return Promise.reject('Email already exists.');
-          }
-        });
-      })
-      .if(body('password').notEmpty())
-      .trim()
-      .normalizeEmail(),
-    body(
-      'password',
-      'Password should be atleast 5 characters in length and should contain alphanumeric characters'
-    )
-      .isLength({ min: 5 })
-      // .withMessage('Password should be atleast 5 characters in length')
-      .isAlphanumeric()
-      // .withMessage('Password should be only contains alphanumeric characters'),
-      .trim(),
-    body('confirmPassword')
-      .custom((value, { req }) => {
-        if (value !== req.body.password) {
-          throw new Error('Password and Confirm Password do not match');
-        }
-
-        return true;
-      })
-      .if(body('confirmPassword').notEmpty())
-      .trim(),
-  ],
-  authController.postSignup
-);
+router.post('/signup', validate('postSignUp'), authController.postSignup);
 
 router.post('/logout', authController.postLogout);
 
