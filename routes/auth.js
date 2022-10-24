@@ -23,6 +23,7 @@ router.post(
           }
         });
       })
+      .if(body('email').notEmpty())
       .trim()
       .normalizeEmail(),
   ],
@@ -49,6 +50,7 @@ router.post(
           }
         });
       })
+      .if(body('password').notEmpty())
       .trim()
       .normalizeEmail(),
     body(
@@ -68,6 +70,7 @@ router.post(
 
         return true;
       })
+      .if(body('confirmPassword').notEmpty())
       .trim(),
   ],
   authController.postSignup

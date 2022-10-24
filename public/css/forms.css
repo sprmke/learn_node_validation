@@ -26,3 +26,7 @@
 .form-control textarea.invalid {
   border-color: red;
 }
+
+.form-control .user-message {
+  width: 100%;
+}

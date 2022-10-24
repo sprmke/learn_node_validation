@@ -30,6 +30,11 @@ const handleLoginError = ({
         .map((error) => error.param)
         .reduce((a, v) => ({ ...a, [v]: v }), {});
 
+  // to add input error border to password
+  if (!validationErrors.password) {
+    validationErrors.password = 'password';
+  }
+
   return res.status(422).render('auth/login', {
     path: '/login',
     pageTitle: 'Login',
@@ -42,7 +47,7 @@ const handleLoginError = ({
 exports.getLogin = (req, res, next) => {
   const errorMessage = getErrorMessage(req);
 
-  res.status(422).render('auth/login', {
+  res.render('auth/login', {
     path: '/login',
     pageTitle: 'Login',
     errorMessage,
@@ -77,6 +82,7 @@ exports.postLogin = (req, res, next) => {
 
   if (!errors.isEmpty()) {
     handleLoginError({ res, oldInput: { email, password }, errors });
+    return;
   }
 
   User.findOne({ email })
@@ -124,8 +130,9 @@ exports.postSignup = (req, res, next) => {
     .map((error) => error.param)
     .reduce((a, v) => ({ ...a, [v]: v }), {});
 
+  console.log('validationErrors::', validationErrors);
+
   if (!errors.isEmpty()) {
-    console.log('validationErrors::', validationErrors);
     return res.status(422).render('auth/signup', {
       path: '/signup',
       pageTitle: 'Signup',
@@ -292,6 +299,7 @@ exports.postNewPassword = (req, res, next) => {
       return bcrypt.hash(newPassword, 12);
     })
     .then((encryptedPassword) => {
+      console.log('resetUser::', resetUser);
       // update user password and token data
       resetUser.password = encryptedPassword;
       resetUser.resetToken = null;
