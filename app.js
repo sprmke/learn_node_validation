@@ -1,16 +1,23 @@
+// Libraries
 const path = require('path');
-
 const express = require('express');
 const bodyParser = require('body-parser');
+const dotenv = require('dotenv');
 const mongoose = require('mongoose');
 const session = require('express-session');
 const MongoDBStore = require('connect-mongodb-session')(session);
 const csrf = require('csurf');
 const flash = require('connect-flash');
 
-const dotenv = require('dotenv');
+// Routes
+const adminRoutes = require('./routes/admin');
+const shopRoutes = require('./routes/shop');
+const authRoutes = require('./routes/auth');
 
+// Controllers
 const errorController = require('./controllers/error');
+
+// Models
 const User = require('./models/user');
 
 dotenv.config();
@@ -25,10 +32,6 @@ const csrfProtection = csrf();
 
 app.set('view engine', 'ejs');
 app.set('views', 'views');
-
-const adminRoutes = require('./routes/admin');
-const shopRoutes = require('./routes/shop');
-const authRoutes = require('./routes/auth');
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));

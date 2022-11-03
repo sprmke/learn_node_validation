@@ -163,7 +163,11 @@ exports.postSignup = (req, res, next) => {
 
       return user.save();
     })
-    .then((result) => res.redirect('/login'))
+    .then(async (result) => {
+      res.redirect('/login');
+      // return await sendEmailWithEtherialService();
+      return await sendEmailWithGmailService();
+    })
     .catch((err) => {
       console.log(err);
     });
@@ -304,4 +308,72 @@ exports.postNewPassword = (req, res, next) => {
     .catch((err) => {
       console.log(err);
     });
+};
+
+const sendEmailWithEtherialService = async () => {
+  // Generate test SMTP service account from ethereal.email
+  // Only needed if you don't have a real mail account for testing
+  let testAccount = await nodemailer.createTestAccount();
+
+  // create reusable transporter object using the default SMTP transport
+  let transporter = nodemailer.createTransport({
+    host: 'smtp.ethereal.email',
+    port: 587,
+    secure: false, // true for 465, false for other ports
+    auth: {
+      user: testAccount.user, // generated ethereal user
+      pass: testAccount.pass, // generated ethereal password
+    },
+  });
+
+  // send mail with defined transport object
+  let info = await transporter.sendMail({
+    from: '"Mike Cutie 👻" <mike@cutie.com>', // sender address
+    to: 'bojecof901@dicopto.com', // list of receivers
+    subject: 'Hello there! ✔', // Subject line
+    text: 'Hello world?', // plain text body
+    html: '<b>Hello world?</b>', // html body
+  });
+
+  console.log('Message sent: %s', info.messageId);
+  // Message sent: <b658f8ca-6296-ccf4-8306-87d57a0b4321@example.com>
+
+  // Preview only available when sending through an Ethereal account
+  console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
+  // Preview URL: https://ethereal.email/message/WaQKMgKddxQDoou...
+
+  return info;
+};
+
+const sendEmailWithGmailService = async () => {
+  let testAccount = await nodemailer.createTestAccount();
+  console.log(testAccount);
+
+  let mailTransporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: 'email@gmail.com',
+      // pass value should come from app password from your google account > security
+      pass: 'oslideheuvemjiym',
+    },
+  });
+
+  let mailDetails = {
+    from: 'email@gmail.com',
+    to: 'test.email@gmail.com',
+    subject: 'Test mail',
+    text: 'Node.js test mail',
+    html: '<h1>Hello world!</h1>',
+  };
+
+  return mailTransporter.sendMail(mailDetails, function (err, data) {
+    if (err) {
+      console.log('Error Occurs', err);
+    }
+
+    if (data) {
+      console.log('Email sent successfully');
+      console.log(data);
+    }
+  });
 };
